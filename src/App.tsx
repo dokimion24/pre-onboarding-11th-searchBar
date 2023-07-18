@@ -25,13 +25,22 @@ function App() {
         />
         {inputValue && (
           <S.Wrapper>
-            <ul>
-              <S.SearchText>{inputValue}</S.SearchText>
-              <S.SuggestionText>추천 검색어</S.SuggestionText>
-              {sicks.map((item) => (
-                <SearchItem key={item.sickCd} sicks={item} />
-              ))}
-            </ul>
+            {sicks.length > 0 ? (
+              <ul>
+                <S.SearchText>{inputValue}</S.SearchText>
+                {sicks.length > 0 && (
+                  <S.SuggestionText>추천 검색어</S.SuggestionText>
+                )}
+                {sicks.map((item) => (
+                  <SearchItem key={item.sickCd} sicks={item} />
+                ))}
+              </ul>
+            ) : (
+              <>
+                <S.SearchText>{inputValue}</S.SearchText>
+                <S.NotSearchText>검색어 없음</S.NotSearchText>
+              </>
+            )}
           </S.Wrapper>
         )}
       </S.Main>

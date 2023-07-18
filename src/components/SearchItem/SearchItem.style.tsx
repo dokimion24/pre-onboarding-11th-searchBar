@@ -1,5 +1,9 @@
 import { styled } from 'styled-components';
 
 export const Item = styled.li`
-  padding: 8px 0;
+  padding: 12px 20px;
+
+  &:hover {
+    background-color: #efeeee;
+  }
 `;

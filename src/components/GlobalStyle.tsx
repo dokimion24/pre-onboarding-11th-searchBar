@@ -10,6 +10,7 @@ const GlobalStyle = createGlobalStyle`
 
 body {
   margin: 0;
+  padding-top: 10%;
   display: flex;
   justify-content: center;
   height:100vh;

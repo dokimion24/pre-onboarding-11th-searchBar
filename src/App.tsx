@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SearchForm from './components/SearchForm/SearchForm';
 import SearchItem from './components/SearchItem/SearchItem';
-import { Sick } from './apis/search';
+import { Sick } from './service/axios';
 import GlobalStyle from './components/GlobalStyle';
 import * as S from './App.style';
 

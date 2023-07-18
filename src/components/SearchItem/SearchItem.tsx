@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sick } from '../../apis/search';
+import { Sick } from '../../service/axios';
 import * as S from './SearchItem.style';
 
 interface Props {

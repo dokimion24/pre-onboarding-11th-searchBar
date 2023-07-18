@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { getSicks } from '../../apis/search';
+import { getSicks } from '../../service/axios';
 import * as S from './SearchForm.style';
 
 interface Props {

@@ -8,9 +8,9 @@ export const Title = styled.h1`
 `;
 
 export const Wrapper = styled.section`
+  padding: 12px 0;
   background-color: #fff;
-  padding: 12px 20px;
-  border-radius: 24px;
+  border-radius: 16px;
 `;
 
 export const Main = styled.main`
@@ -18,10 +18,19 @@ export const Main = styled.main`
 `;
 
 export const SearchText = styled.p`
-  padding: 8px 0;
+  padding: 12px 20px;
+
+  &:hover {
+    background-color: #efeeee;
+  }
+`;
+
+export const NotSearchText = styled.p`
+  padding: 0 20px;
 `;
 
 export const SuggestionText = styled.p`
   color: #a4a4a4;
+  padding: 0 20px;
   font-size: 12px;
 `;

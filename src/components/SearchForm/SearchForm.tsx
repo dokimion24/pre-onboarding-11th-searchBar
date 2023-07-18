@@ -1,6 +1,7 @@
-import React, { ChangeEvent } from 'react';
-import { getSicks } from '../../service/axios';
+import React, { useEffect } from 'react';
 import * as S from './SearchForm.style';
+import { CacheApiServer } from '../../service/cache';
+import useDebounce from '../../hooks/useDeounce';
 
 interface Props {
   inputValue: string;
@@ -9,15 +10,22 @@ interface Props {
 }
 
 const SearchForm = ({ inputValue, setInputValue, setSicks }: Props) => {
-  const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    const res = await getSicks({ q: e.target.value });
-    setSicks(res);
-  };
+  const debouncedValue = useDebounce(inputValue);
+
+  useEffect(() => {
+    const getSicks = async () => {
+      const res = await CacheApiServer.getSearchByQuery(debouncedValue);
+      setSicks(res);
+    };
+    if (debouncedValue) getSicks();
+  }, [debouncedValue]);
 
   return (
     <S.Wrapper>
-      <S.Input onChange={handleChange} value={inputValue} />
+      <S.Input
+        onChange={(e) => setInputValue(e.target.value)}
+        value={inputValue}
+      />
       <S.Button>검색</S.Button>
     </S.Wrapper>
   );

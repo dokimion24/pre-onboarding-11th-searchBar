@@ -1,5 +1,5 @@
 ### 배포 사이트
-데모([https://pre-onboarding-11th-search-kko4s2fto-dokimion0.vercel.app/])
+[데모](https://pre-onboarding-11th-search-kko4s2fto-dokimion0.vercel.app/)
 
 ### 실행 방법
 ```

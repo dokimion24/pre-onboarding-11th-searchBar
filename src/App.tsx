@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import SearchForm from './components/SearchForm/SearchForm';
 import SearchItem from './components/SearchItem/SearchItem';
-import { Sick } from './service/axios';
 import GlobalStyle from './components/GlobalStyle';
 import * as S from './App.style';
+import useKeyboard from './hooks/useKeyboard';
+import { Sick } from './types';
 
 function App() {
   const [inputValue, setInputValue] = useState('');
   const [sicks, setSicks] = useState<Sick[]>([]);
+
+  const { currentIndex, ulRef, handleKeyPress } = useKeyboard(
+    sicks.length,
+    setInputValue
+  );
 
   return (
     <>
@@ -22,19 +28,26 @@ function App() {
           inputValue={inputValue}
           setInputValue={setInputValue}
           setSicks={setSicks}
+          onKeyDown={handleKeyPress}
         />
         {inputValue && (
           <S.Wrapper>
             {sicks.length > 0 ? (
-              <ul>
+              <>
                 <S.SearchText>{inputValue}</S.SearchText>
                 {sicks.length > 0 && (
                   <S.SuggestionText>추천 검색어</S.SuggestionText>
                 )}
-                {sicks.map((item) => (
-                  <SearchItem key={item.sickCd} sicks={item} />
-                ))}
-              </ul>
+                <ul ref={ulRef}>
+                  {sicks.slice(0, 7).map((item, index) => (
+                    <SearchItem
+                      key={item.sickCd}
+                      sicks={item}
+                      isFocus={currentIndex === index}
+                    />
+                  ))}
+                </ul>
+              </>
             ) : (
               <>
                 <S.SearchText>{inputValue}</S.SearchText>

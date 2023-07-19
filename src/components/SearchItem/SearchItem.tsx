@@ -1,13 +1,14 @@
 import React from 'react';
-import { Sick } from '../../service/axios';
 import * as S from './SearchItem.style';
+import { Sick } from '../../types';
 
 interface Props {
   sicks: Sick;
+  isFocus: boolean;
 }
 
-const SearchItem = ({ sicks }: Props) => {
-  return <S.Item>{sicks.sickNm}</S.Item>;
+const SearchItem = ({ sicks, isFocus }: Props) => {
+  return <S.Item $isFocus={isFocus}>{sicks.sickNm}</S.Item>;
 };
 
 export default SearchItem;

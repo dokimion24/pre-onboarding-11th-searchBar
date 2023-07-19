@@ -7,9 +7,15 @@ interface Props {
   inputValue: string;
   setInputValue: (value: string) => void;
   setSicks: (value: []) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-const SearchForm = ({ inputValue, setInputValue, setSicks }: Props) => {
+const SearchForm = ({
+  inputValue,
+  setInputValue,
+  setSicks,
+  onKeyDown,
+}: Props) => {
   const debouncedValue = useDebounce(inputValue);
 
   useEffect(() => {
@@ -25,6 +31,7 @@ const SearchForm = ({ inputValue, setInputValue, setSicks }: Props) => {
       <S.Input
         onChange={(e) => setInputValue(e.target.value)}
         value={inputValue}
+        onKeyDown={onKeyDown}
       />
       <S.Button>검색</S.Button>
     </S.Wrapper>

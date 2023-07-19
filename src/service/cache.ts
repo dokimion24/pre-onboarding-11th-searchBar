@@ -21,7 +21,7 @@ export class CacheApiServer {
 
   private static async getFetchResponse(cache: Cache, url: string) {
     const fetchResponse = await fetch(url);
-    console.info('calling api');
+    console.log('calling api');
     const newResponse = await this.getResponseWithFetchDate(fetchResponse);
     cache.put(url, newResponse);
     return fetchResponse.json();

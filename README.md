@@ -1,46 +1,147 @@
-# Getting Started with Create React App
+### 배포 사이트
+데모([https://pre-onboarding-11th-search-kko4s2fto-dokimion0.vercel.app/])
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### 실행 방법
+```
+npm install
+npm start
+```
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `npm start`
+### API호출별 로컬 캐싱 (Cache Storage)
+- 네트워크 요청에 따라 리소스를 캐싱할 경우 Cache Stroage API가 적합
+-  요청 결과를 일정 시간 동안 캐시에 저장하고, 만료된 캐시일 경우에만 API로부터 새로운 데이터를 가져와서 캐시를 갱신
+  
+```tsx
+const HEADER_FETCH_DATE = 'fetch-date';
+const EXPIRE_TIME = 10 * 60 * 1000;
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+export class CacheApiServer {
+  private static cacheStorage = 'CACHE_STORAGE';
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  static async getSearchByQuery(search: string) {
+    const url = `http://localhost:4000/sick?q=${search}`;
+    const cache = await caches.open(this.cacheStorage);
 
-### `npm test`
+    return await this.getValidResponse(cache, url);
+  }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  private static async getValidResponse(cache: Cache, url: string) {
+    const cacheResponse = await caches.match(url);
 
-### `npm run build`
+    return cacheResponse && !this.isCacheExpired(cacheResponse)
+      ? await cacheResponse.json()
+      : await this.getFetchResponse(cache, url);
+  }
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  private static async getFetchResponse(cache: Cache, url: string) {
+    const fetchResponse = await fetch(url);
+    console.log('calling api');
+    const newResponse = await this.getResponseWithFetchDate(fetchResponse);
+    cache.put(url, newResponse);
+    return fetchResponse.json();
+  }
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  private static async getResponseWithFetchDate(fetchResponse: Response) {
+    const cloneResponse = fetchResponse.clone();
+    const newBody = await cloneResponse.blob();
+    let newHeaders = new Headers(cloneResponse.headers);
+    newHeaders.append(HEADER_FETCH_DATE, new Date().toISOString());
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    return new Response(newBody, {
+      status: cloneResponse.status,
+      statusText: cloneResponse.statusText,
+      headers: newHeaders,
+    });
+  }
 
-### `npm run eject`
+  private static isCacheExpired(cacheResponse: Response) {
+    const fetchDate = new Date(
+      cacheResponse.headers.get(HEADER_FETCH_DATE)!
+    ).getTime();
+    const today = new Date().getTime();
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+    return today - fetchDate > EXPIRE_TIME;
+  }
+}
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+### 키보드만으로 추천 검색어 이동 기능
+- useKeyboard 커스텀 훅
+- Enter 키 누를 시 해당 검색어를 검색창에 설정
+- 위, 아래 키 누를 시 추천 검색어 이동 
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+``` tsx
+import React, { useState, useRef, KeyboardEvent } from 'react';
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+type KeyboardProps = {
+  currentIndex: number;
+  ulRef: React.RefObject<HTMLUListElement>;
+  handleKeyPress: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+};
+
+export default function useKeyboard(
+  dataLength: number,
+  setKeyword: React.Dispatch<React.SetStateAction<string>>
+): KeyboardProps {
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const ulRef = useRef<HTMLUListElement>(null);
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (dataLength > 0) {
+      switch (e.key) {
+        case 'ArrowDown':
+          setCurrentIndex(currentIndex + 1);
+          if (ulRef.current?.childElementCount === currentIndex + 1)
+            setCurrentIndex(0);
+          break;
+        case 'ArrowUp':
+          setCurrentIndex(currentIndex - 1);
+          if (currentIndex <= 0) {
+            setCurrentIndex(ulRef.current!.childElementCount - 1);
+          }
+          break;
+        case 'Enter':
+          setCurrentIndex(-1);
+          setKeyword(
+            ulRef.current?.children[currentIndex].textContent as string
+          );
+          break;
+      }
+    }
+  };
+
+  return { currentIndex, ulRef, handleKeyPress };
+}
+```
+
+### 불필요한 API 요청 방지
+- useDebounce 커스텀 훅 사용
+- 값 입력 후 0.4초 후에 API 호출
+
+```tsx
+import { useEffect, useState } from 'react';
+
+const useDebounce = (value: string, delay: number = 400) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+export default useDebounce;
+
+```
